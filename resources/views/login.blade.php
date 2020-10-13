@@ -26,7 +26,7 @@
             echo '<p style="color: red;">' . htmlentities($error)."</p>\n";
         }
     @endphp
-    <form method="post" action="../../app/Http/Controllers/UserController.php">
+    <form method="post" action="/login">
         @csrf
         <label for="username">Username:</label>
         <input type="text" name="username" id="username">

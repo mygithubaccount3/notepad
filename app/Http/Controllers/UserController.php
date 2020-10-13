@@ -3,11 +3,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 
 class UserController extends Controller
@@ -23,26 +21,21 @@ class UserController extends Controller
 
     public function logIn(Request $request)
     {
-        $value = $request->session()->get('error');
         if($request->isMethod('POST')) {
-            $username = $request->input('username');
-            $password = $request->input('password');
-            if(isset($username) && isset($password)) {
-                if(strlen($username) < 1 || strlen($password) < 1) {
+            $credentials = $request->only('username', 'password');
+            if(isset($credentials['username']) && isset($credentials['password'])) {
+                if(strlen($credentials['username']) < 1 || strlen($credentials['password']) < 1) {
                     Log::error('Username and password are required');
                     $request->session()->flash('error', 'Username and password are required');
                     return redirect('/login');
                 } else {
-                    if(preg_match('/^(?=.{1,20}$)[a-zA-Z0-9]+$/', $username)) {
-                        $check = hash('md5', "XyZzy12*_$password");
-                        $user = DB::select('SELECT user_id FROM user WHERE username = ? AND password = ?', [$username, $password]);
-                        if (isset($user[0])) {
-                            /*echo $user[0]->username;*/
-                            Log::info('Login success '. $username);
-                            $request->session()->put('user_id', $user[0].$username);
-                            return redirect('/');
+                    if(preg_match('/^(?=.{1,20}$)[a-zA-Z0-9]+$/', $credentials['username'])) {
+                        if (Auth::attempt($credentials)) {
+                            Log::info('Login success '. $credentials['username']);
+                            $request->session()->put('username', $credentials['username']);
+                            return redirect()->intended();
                         } else {
-                            Log::error("Login fail $username $check");
+                            Log::error('Login fail' . $credentials['username'] . ' ' . $credentials['password']);
                             $request->session()->flash('error', 'Incorrect password');
                             return redirect('/login');
                         }
@@ -56,5 +49,6 @@ class UserController extends Controller
         } else if ($request->isMethod('GET')) {
             return view('login');
         }
+        return redirect('/login');
     }
 }
