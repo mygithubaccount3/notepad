@@ -16,6 +16,8 @@ use App\Http\Controllers\UserController;
 
 Route::get('/', [UserController::class, 'index']);
 Route::match(['get', 'post'],'/login', [UserController::class, 'logIn']);
+Route::get('/logout', [UserController::class, 'logOut']);
+Route::match(['get', 'post'],'/signup', [UserController::class, 'signUp']);
 Route::get('/welcome', function () {
     return view('welcome');
 });
